@@ -16,17 +16,26 @@ for (const envVar of requiredEnvVars) {
 
 const app = express()
 
-// Middleware
+// Updated CORS configuration
+const allowedOrigins = ['http://localhost:3000', 'https://portfolio-website-omega-sage.vercel.app']
+
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? 'https://your-production-domain.com' // Change this to your actual domain in production
-        : 'http://localhost:3000', // Vite's default development port
-    methods: ['POST'],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true)
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.'
+        return callback(new Error(msg), false)
+      }
+      return callback(null, true)
+    },
+    methods: ['POST', 'OPTIONS'],
     credentials: true,
   })
 )
+
 app.use(express.json())
 
 // Create transporter
